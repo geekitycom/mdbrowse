@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +15,10 @@
     "dompurify": "^3.4.16",
     "github-markdown-css": "^5.9.0",
     "marked": "^18.1.0"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "husky": "^9.1.7"
   }
 }
