@@ -37,6 +37,8 @@ const address = document.getElementById('address');
 const status = document.getElementById('status');
 const content = document.getElementById('content');
 
+const HOME_SOURCE = new URL('/homepage.md', location.origin).href;
+
 let currentUrl = null;
 
 function slugify(text, seen) {
@@ -156,7 +158,23 @@ content.addEventListener('click', (e) => {
 
 document.getElementById('back').addEventListener('click', () => history.back());
 document.getElementById('forward').addEventListener('click', () => history.forward());
-document.getElementById('reload').addEventListener('click', () => currentUrl && load(currentUrl, { push: false }));
+document.getElementById('reload').addEventListener('click', () => (currentUrl ? load(currentUrl, { push: false }) : showHome()));
+
+async function showHome() {
+  currentUrl = null;
+  address.value = '';
+  status.textContent = '';
+  const res = await fetch(HOME_SOURCE);
+  if (!res.ok) return showError({ error: 'Could not load the homepage.' });
+  render(await res.text(), HOME_SOURCE);
+  document.title = content.querySelector('h1')?.textContent || 'mdbrowse';
+  scrollTo(0, 0);
+}
+
+document.getElementById('home').addEventListener('click', () => {
+  if (location.search) history.pushState(null, '', '/');
+  showHome();
+});
 
 window.addEventListener('popstate', (e) => {
   if (e.state?.url && isSameDoc(e.state.url)) {
@@ -164,12 +182,9 @@ window.addEventListener('popstate', (e) => {
     return showPosition(e.state.url);
   }
   if (e.state?.url) return load(e.state.url, { push: false });
-  currentUrl = null;
-  address.value = '';
-  status.textContent = '';
-  content.replaceChildren();
-  document.title = 'mdbrowse';
+  showHome();
 });
 
 const initial = new URLSearchParams(location.search).get('url');
 if (initial) load(initial, { push: false });
+else showHome();

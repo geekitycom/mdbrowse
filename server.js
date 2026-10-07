@@ -12,12 +12,13 @@ const isAllowed = process.env.MDBROWSE_ALLOW_PRIVATE === 'true' ? () => true : i
 const STATIC = {
   '/': 'public/index.html',
   '/app.js': 'public/app.js',
+  '/homepage.md': 'homepage.md',
   '/vendor/marked.js': 'node_modules/marked/lib/marked.esm.js',
   '/vendor/purify.js': 'node_modules/dompurify/dist/purify.es.mjs',
   '/vendor/github-markdown.css': 'node_modules/github-markdown-css/github-markdown.css',
 };
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css' };
+const MIME = { '.md': 'text/markdown; charset=utf-8', '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css' };
 
 const MARKDOWN_TYPES = new Set(['text/markdown', 'text/x-markdown', 'text/plain']);
 
