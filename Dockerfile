@@ -7,10 +7,16 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
+# pnpm at the version packageManager in package.json names.
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
+
 # --ignore-scripts: `prepare` runs husky, which is a devDependency and has no
-# .git to install into.
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+# .git to install into. The store is removed afterwards; node_modules keeps its
+# own links to the files.
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts \
+  && rm -rf "$(pnpm store path)" /root/.cache
 
 COPY server.js ./
 COPY public ./public

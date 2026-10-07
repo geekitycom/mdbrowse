@@ -14,8 +14,8 @@
 # Usage (from the repository root):
 #
 #   scripts/docker-build-push.sh [--dry-run | --check-only] [CUSTOM_TAG]
-#   npm run docker:build-push [-- CUSTOM_TAG]
-#   npm run docker:dry-run [-- CUSTOM_TAG]
+#   pnpm docker:build-push [CUSTOM_TAG]
+#   pnpm docker:dry-run [CUSTOM_TAG]
 set -euo pipefail
 
 readonly IMAGE="ghcr.io/geekitycom/mdbrowse"
@@ -64,6 +64,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --dry-run) set_mode dry-run ;;
     --check-only) set_mode check-only ;;
+    # pnpm passes the -- in `pnpm docker:build-push -- beta` through.
     --) ;;
     -*)
       usage >&2
@@ -83,7 +84,7 @@ fi
 
 root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 if [[ "$(pwd -P)" != "$root" || ! -f "$DOCKERFILE" || ! -f "$VERSION_FILE" ]]; then
-  fail "run this from the repository root (${root}), for example with npm run docker:build-push"
+  fail "run this from the repository root (${root}), for example with pnpm docker:build-push"
 fi
 
 version="$(node -p "require('./${VERSION_FILE}').version")"
