@@ -45,6 +45,10 @@ describe('safeGet', () => {
         res.on('close', () => res.removeAllListeners('drain'));
         return pump();
       }
+      if (pathname === '/bom') {
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        return res.end(Buffer.concat([Buffer.from([0xef, 0xbb, 0xbf]), Buffer.from('# Title')]));
+      }
       res.writeHead(200, { 'Content-Type': 'text/markdown' });
       res.end('# ok');
     });
@@ -76,6 +80,11 @@ describe('safeGet', () => {
     const { url, response } = await get(`${base}/`, { isAllowed: onlyLoopbackV4 });
     assert.equal(url.href, `${base}/`);
     assert.equal(await readBody(response, 1024), '# ok');
+  });
+
+  test('drops a UTF-8 byte order mark so a leading heading still parses', async () => {
+    const { response } = await get(`${base}/bom`, { isAllowed: onlyLoopbackV4 });
+    assert.equal(await readBody(response, 1024), '# Title');
   });
 
   test('refuses a redirect to a disallowed address', async () => {

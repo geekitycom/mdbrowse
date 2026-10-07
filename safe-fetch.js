@@ -107,8 +107,8 @@ export async function safeGet(url, { headers, timeoutMs, maxRedirects = 5, isAll
   }
 }
 
-// Reads the body as UTF-8, stopping as soon as it passes `maxBytes` whatever
-// the headers claimed.
+// Reads the body as UTF-8, dropping a byte order mark as fetch's text() does,
+// and stops as soon as it passes `maxBytes` whatever the headers claimed.
 export async function readBody(response, maxBytes) {
   const chunks = [];
   let size = 0;
@@ -120,5 +120,5 @@ export async function readBody(response, maxBytes) {
     }
     chunks.push(chunk);
   }
-  return Buffer.concat(chunks).toString('utf8');
+  return new TextDecoder().decode(Buffer.concat(chunks));
 }
