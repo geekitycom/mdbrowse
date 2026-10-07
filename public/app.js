@@ -120,7 +120,11 @@ async function load(url, { push = true } = {}) {
   setLocation(result.url, push);
 
   if (result.ok) {
-    status.textContent = result.status >= 400 ? `HTTP ${result.status} · ${result.contentType}` : result.contentType;
+    status.textContent = [
+      result.status >= 400 && `HTTP ${result.status}`,
+      result.contentType,
+      result.fallbackFrom && `no markdown at ${result.fallbackFrom}, showing llms.txt`,
+    ].filter(Boolean).join(' · ');
     render(result.markdown, result.url);
     document.title = content.querySelector('h1')?.textContent || result.url;
     showPosition(result.url);

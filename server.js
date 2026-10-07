@@ -26,7 +26,7 @@ function looksLikeHtml(body) {
   return /^<(!doctype html|html|head|body)[\s>]/.test(head);
 }
 
-async function fetchMarkdown(target) {
+async function fetchOne(target) {
   let url;
   try {
     url = new URL(target);
@@ -84,6 +84,25 @@ async function fetchMarkdown(target) {
   }
   if (!ok && !markdown.trim()) return fail();
   return { ok: true, url: finalUrl.href, status, contentType: contentType || 'unknown', markdown };
+}
+
+function isSiteRoot(target) {
+  try {
+    const { pathname, search } = new URL(target);
+    return pathname === '/' && !search;
+  } catch {
+    return false;
+  }
+}
+
+// A site whose homepage has no markdown may still describe itself in
+// /llms.txt (https://llmstxt.org), so a root that answered with something
+// else falls back to that.
+async function fetchMarkdown(target) {
+  const result = await fetchOne(target);
+  if (result.ok || !result.status || !isSiteRoot(target)) return result;
+  const llms = await fetchOne(new URL('/llms.txt', result.url).href);
+  return llms.ok && llms.status < 300 ? { ...llms, fallbackFrom: result.url } : result;
 }
 
 function send(res, status, type, body) {
