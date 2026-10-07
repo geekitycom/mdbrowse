@@ -18,7 +18,7 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile --ignore-scripts \
   && rm -rf "$(pnpm store path)" /root/.cache
 
-COPY server.js ./
+COPY server.js safe-fetch.js ./
 COPY public ./public
 
 USER node

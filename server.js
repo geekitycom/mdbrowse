@@ -1,10 +1,13 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { FetchError, isPublicAddress, readBody, safeGet } from './safe-fetch.js';
 
 const PORT = Number(process.env.PORT) || 3000;
 const ROOT = import.meta.dirname;
 const MAX_BYTES = 5 * 1024 * 1024;
+// For local development against servers on this machine or the LAN.
+const isAllowed = process.env.MDBROWSE_ALLOW_PRIVATE === 'true' ? () => true : isPublicAddress;
 
 const STATIC = {
   '/': 'public/index.html',
@@ -34,38 +37,53 @@ async function fetchMarkdown(target) {
     return { ok: false, url: target, error: 'Only http and https URLs are supported.' };
   }
 
-  let res;
+  const failedTo = (err) => {
+    if (err instanceof FetchError) return err.message;
+    if (err.name === 'TimeoutError' || err.name === 'AbortError') return `Timed out fetching from ${url.host}.`;
+    return `Could not connect to ${url.host}.`;
+  };
+
+  let finalUrl, res;
   try {
-    res = await fetch(url, {
-      headers: { Accept: 'text/markdown, text/x-markdown;q=0.9, text/plain;q=0.8' },
-      redirect: 'follow',
-      signal: AbortSignal.timeout(15000),
-    });
+    ({ url: finalUrl, response: res } = await safeGet(url, {
+      headers: {
+        Accept: 'text/markdown, text/x-markdown;q=0.9, text/plain;q=0.8',
+        'Accept-Encoding': 'identity',
+        'User-Agent': 'mdbrowse',
+      },
+      timeoutMs: 15000,
+      isAllowed,
+    }));
   } catch (err) {
-    return { ok: false, url: url.href, error: `Fetch failed: ${err.cause?.message ?? err.message}` };
+    return { ok: false, url: url.href, error: failedTo(err) };
   }
 
-  const finalUrl = res.url || url.href;
-  const contentType = (res.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
-
-  const { status } = res;
-  const fail = (error) => ({ ok: false, url: finalUrl, status, error: res.ok ? error : `Server responded ${status} ${res.statusText}.` });
+  const status = res.statusCode;
+  const ok = status >= 200 && status < 300;
+  const contentType = (res.headers['content-type'] ?? '').split(';')[0].trim().toLowerCase();
+  const fail = (error) => {
+    res.destroy();
+    return { ok: false, url: finalUrl.href, status, error: ok ? error : `Server responded ${status} ${res.statusMessage}.` };
+  };
 
   if (contentType && !MARKDOWN_TYPES.has(contentType)) {
-    res.body?.cancel();
     return fail(`Not markdown: server returned ${contentType}.`);
   }
-  if (Number(res.headers.get('content-length')) > MAX_BYTES) {
-    res.body?.cancel();
+  if (Number(res.headers['content-length']) > MAX_BYTES) {
     return fail('Document is larger than 5 MB.');
   }
 
-  const markdown = await res.text();
+  let markdown;
+  try {
+    markdown = await readBody(res, MAX_BYTES);
+  } catch (err) {
+    return { ok: false, url: finalUrl.href, status, error: failedTo(err) };
+  }
   if (looksLikeHtml(markdown)) {
     return fail(`Not markdown: ${contentType || 'response'} body is an HTML document.`);
   }
-  if (!res.ok && !markdown.trim()) return fail();
-  return { ok: true, url: finalUrl, status, contentType: contentType || 'unknown', markdown };
+  if (!ok && !markdown.trim()) return fail();
+  return { ok: true, url: finalUrl.href, status, contentType: contentType || 'unknown', markdown };
 }
 
 function send(res, status, type, body) {
