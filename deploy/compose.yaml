@@ -1,0 +1,39 @@
+# mdbrowse as a dockge stack.
+#
+# Create a stack in dockge, paste this file in as its compose.yaml, and put a
+# .env beside it naming the version to run:
+#
+#   MDBROWSE_TAG=1.0.0
+#
+# The image is pulled from ghcr.io; nothing is built on the server. The app
+# keeps no state, so there are no volumes to create.
+
+services:
+  mdbrowse:
+    # Required, so the running version is always written down and a rollback is
+    # naming the previous one. `latest` works too if that is what you want.
+    image: ghcr.io/geekitycom/mdbrowse:${MDBROWSE_TAG:?set MDBROWSE_TAG in .env to the version to run}
+    restart: unless-stopped
+    init: true
+
+    read_only: true
+    mem_limit: 256m
+    pids_limit: 128
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+    ports:
+      # 127.0.0.1 only, for a reverse proxy on the same host. Docker's own
+      # firewall rules run ahead of ufw, so publishing on every interface would
+      # put the app on the internet beside the proxy.
+      - '127.0.0.1:${MDBROWSE_HOST_PORT:-3000}:3000'
+
+    environment:
+      # Fixed so the port mapping and the image's healthcheck agree.
+      PORT: '3000'

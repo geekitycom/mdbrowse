@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "docker:build-push": "./scripts/docker-build-push.sh",
+    "docker:dry-run": "./scripts/docker-build-push.sh --dry-run"
   },
   "keywords": [],
   "author": "",

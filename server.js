@@ -77,6 +77,8 @@ http
   .createServer(async (req, res) => {
     const { pathname, searchParams } = new URL(req.url, 'http://localhost');
 
+    if (pathname === '/healthz') return send(res, 200, 'text/plain', 'ok');
+
     if (pathname === '/api/fetch') {
       const result = await fetchMarkdown(searchParams.get('url') ?? '');
       return send(res, 200, 'application/json', JSON.stringify(result));

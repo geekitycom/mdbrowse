@@ -1,0 +1,11 @@
+.git
+.github
+.husky
+node_modules
+deploy
+scripts
+**/.env
+**/.env.*
+.DS_Store
+Dockerfile
+.dockerignore
