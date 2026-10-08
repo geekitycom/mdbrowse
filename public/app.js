@@ -35,6 +35,7 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
 const form = document.getElementById('nav');
 const address = document.getElementById('address');
 const status = document.getElementById('status');
+const docNav = document.getElementById('doc-nav');
 const content = document.getElementById('content');
 
 const HOME_SOURCE = new URL('/homepage.md', location.origin).href;
@@ -70,16 +71,15 @@ function splitFrontMatter(markdown) {
 }
 
 const DOC_NAV = [
-  ['previous', 'prev', '← Previous'],
+  ['previous', 'prev', 'Previous'],
   ['home', 'home', 'Home'],
-  ['next', 'next', 'Next →'],
+  ['next', 'next', 'Next'],
 ];
 
-// Links between documents named in front matter (previous, home, next).
-// They are added after sanitizing, so only http(s) targets are kept.
-function docNav(meta, baseUrl) {
-  const nav = document.createElement('nav');
-  nav.className = 'doc-nav';
+// Links between documents named in front matter (previous, home, next), shown
+// in the status bar. They bypass the sanitizer, so only http(s) targets are kept.
+function renderDocNav(meta, baseUrl) {
+  docNav.replaceChildren();
   for (const [field, rel, label] of DOC_NAV) {
     if (!meta[field]) continue;
     let target;
@@ -89,13 +89,19 @@ function docNav(meta, baseUrl) {
       continue;
     }
     if (target.protocol !== 'http:' && target.protocol !== 'https:') continue;
+    if (docNav.childElementCount) {
+      const sep = document.createElement('span');
+      sep.className = 'sep';
+      sep.textContent = '·';
+      docNav.append(sep);
+    }
     const a = document.createElement('a');
     a.rel = rel;
-    a.setAttribute('href', target.href);
+    a.dataset.target = target.href;
+    a.href = `/?url=${encodeURIComponent(target.href)}`;
     a.textContent = label;
-    nav.append(a);
+    docNav.append(a);
   }
-  return nav.childElementCount ? nav : null;
 }
 
 function render(markdown, baseUrl) {
@@ -108,8 +114,7 @@ function render(markdown, baseUrl) {
     h1.textContent = new DOMParser().parseFromString(meta.title, 'text/html').body.textContent;
     content.prepend(h1);
   }
-  const nav = docNav(meta, baseUrl);
-  if (nav) content.append(nav);
+  renderDocNav(meta, baseUrl);
 
   const seen = new Map();
   for (const h of content.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
@@ -138,6 +143,7 @@ function render(markdown, baseUrl) {
 
 function showError(result) {
   content.replaceChildren();
+  docNav.replaceChildren();
   const p = document.createElement('p');
   p.className = 'error';
   p.textContent = result.error;
@@ -202,7 +208,7 @@ form.addEventListener('submit', (e) => {
   if (address.value.trim()) load(address.value.trim());
 });
 
-content.addEventListener('click', (e) => {
+function followLink(e) {
   const a = e.target.closest('a[data-target]');
   if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
   e.preventDefault();
@@ -213,7 +219,10 @@ content.addEventListener('click', (e) => {
   } else {
     load(target.href, { handoff: true });
   }
-});
+}
+
+content.addEventListener('click', followLink);
+docNav.addEventListener('click', followLink);
 
 document.getElementById('back').addEventListener('click', () => history.back());
 document.getElementById('forward').addEventListener('click', () => history.forward());
