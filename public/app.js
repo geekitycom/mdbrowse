@@ -54,9 +54,62 @@ function scrollToFragment(hash) {
   el?.scrollIntoView();
 }
 
+const FRONT_MATTER = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---\r?\n/;
+
+// Only top-level `key: value` lines are read; nested fields and lists are
+// skipped, since the fields used here are all plain strings.
+function splitFrontMatter(markdown) {
+  const match = markdown.match(FRONT_MATTER);
+  if (!match) return { meta: {}, body: markdown };
+  const meta = {};
+  for (const line of match[1].split(/\r?\n/)) {
+    const field = line.match(/^([A-Za-z_][\w-]*):\s*(.+?)\s*$/);
+    if (field) meta[field[1]] = field[2].replace(/^(['"])(.*)\1$/, '$2');
+  }
+  return { meta, body: markdown.slice(match[0].length) };
+}
+
+const DOC_NAV = [
+  ['previous', 'prev', '← Previous'],
+  ['home', 'home', 'Home'],
+  ['next', 'next', 'Next →'],
+];
+
+// Links between documents named in front matter (previous, home, next).
+// They are added after sanitizing, so only http(s) targets are kept.
+function docNav(meta, baseUrl) {
+  const nav = document.createElement('nav');
+  nav.className = 'doc-nav';
+  for (const [field, rel, label] of DOC_NAV) {
+    if (!meta[field]) continue;
+    let target;
+    try {
+      target = new URL(meta[field], baseUrl);
+    } catch {
+      continue;
+    }
+    if (target.protocol !== 'http:' && target.protocol !== 'https:') continue;
+    const a = document.createElement('a');
+    a.rel = rel;
+    a.setAttribute('href', target.href);
+    a.textContent = label;
+    nav.append(a);
+  }
+  return nav.childElementCount ? nav : null;
+}
+
 function render(markdown, baseUrl) {
-  const body = markdown.replace(/^\uFEFF?---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
+  const { meta, body } = splitFrontMatter(markdown);
   content.innerHTML = DOMPurify.sanitize(marked.parse(body), SANITIZE);
+
+  if (meta.title && !content.querySelector('h1')) {
+    const h1 = document.createElement('h1');
+    // Some generators write HTML entities into the title.
+    h1.textContent = new DOMParser().parseFromString(meta.title, 'text/html').body.textContent;
+    content.prepend(h1);
+  }
+  const nav = docNav(meta, baseUrl);
+  if (nav) content.append(nav);
 
   const seen = new Map();
   for (const h of content.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
