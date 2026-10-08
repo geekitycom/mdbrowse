@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.2.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.1.0...mdbrowse-v1.2.0) (2026-10-08)
+
+
+### Features
+
+* hand non-markdown links to the browser and open links in new tabs ([2ed4c6b](https://github.com/geekitycom/mdbrowse/commit/2ed4c6b524c4a13e5ff6b059e39e802533dff836))
+* show a document's updated date in the status line ([ba82fef](https://github.com/geekitycom/mdbrowse/commit/ba82fef5fa64de48c01704278b855696ebb552b3))
+* show front matter navigation in the status bar ([b947188](https://github.com/geekitycom/mdbrowse/commit/b9471880e9f80517c54f565378c221918d889dc7))
+* use front matter title and navigation, and narrow the reading column ([1ed9743](https://github.com/geekitycom/mdbrowse/commit/1ed9743c281fa72b048b53d0167847ab2efb2804))
+
+
+### Bug Fixes
+
+* drop a UTF-8 byte order mark from fetched documents ([ed79b6e](https://github.com/geekitycom/mdbrowse/commit/ed79b6ed72f94dc89bc780367cd6654028b43b8e))
+
 ## [1.1.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.0.0...mdbrowse-v1.1.0) (2026-10-07)
 
 
