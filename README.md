@@ -36,7 +36,11 @@ pnpm install
 pnpm start
 ```
 
-Then open <http://localhost:3000>. `pnpm install` also installs the Git hook
+Then open <http://localhost:3000>. `pnpm start` restarts the server when
+`server.js` or a module it imports changes. Files under `public/` and
+`homepage.md` are read on every request, so a browser refresh picks them up.
+
+`pnpm install` also installs the Git hook
 that checks commit messages (see [Releasing](#releasing)).
 
 Node.js 25 and later no longer include Corepack. On those versions, install it
