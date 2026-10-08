@@ -10,7 +10,6 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const isAllowed = process.env.MDBROWSE_ALLOW_PRIVATE === 'true' ? () => true : isPublicAddress;
 
 const STATIC = {
-  '/': 'public/index.html',
   '/app.js': 'public/app.js',
   '/homepage.md': 'homepage.md',
   '/vendor/marked.js': 'node_modules/marked/lib/marked.esm.js',
@@ -99,11 +98,51 @@ function isSiteRoot(target) {
 // A site whose homepage has no markdown may still describe itself in
 // /llms.txt (https://llmstxt.org), so a root that answered with something
 // else falls back to that.
-async function fetchMarkdown(target) {
+async function fetchSite(target) {
   const result = await fetchOne(target);
   if (result.ok || !result.status || !isSiteRoot(target)) return result;
   const llms = await fetchOne(new URL('/llms.txt', result.url).href);
   return llms.ok && llms.status < 300 ? { ...llms, fallbackFrom: result.url } : result;
+}
+
+function candidatesFor(input) {
+  const trimmed = input.trim();
+  return /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) ? [trimmed] : [`https://${trimmed}`, `http://${trimmed}`];
+}
+
+// Tries https then http for an address typed without a scheme, and keeps the
+// requested #fragment, which is never sent to the server and so is missing
+// from the final URL.
+async function fetchMarkdown(input) {
+  let result;
+  for (const candidate of candidatesFor(input)) {
+    const attempt = await fetchSite(candidate);
+    result ??= attempt;
+    if (attempt.ok) {
+      result = attempt;
+      break;
+    }
+  }
+  const fragment = input.includes('#') ? input.slice(input.indexOf('#')) : '';
+  if (fragment && !result.url.includes('#')) result.url += fragment;
+  return result;
+}
+
+// Opening /?url= in a new tab fetches on the server. A page that is not
+// markdown is redirected to, so it opens as a normal page, but only when the
+// link was followed from mdbrowse itself; otherwise anyone could use
+// /?url= as an open redirect to send people anywhere.
+async function serveBrowser(req, res, target) {
+  const result = target ? await fetchMarkdown(target) : null;
+  if (result && !result.ok && result.status && req.headers['sec-fetch-site'] === 'same-origin') {
+    res.writeHead(302, { Location: result.url });
+    return res.end();
+  }
+  const page = await readFile(join(ROOT, 'public/index.html'), 'utf8');
+  const initial = result
+    ? `<script id="initial-result" type="application/json">${JSON.stringify(result).replace(/</g, '\\u003c')}</script>`
+    : '';
+  send(res, 200, 'text/html; charset=utf-8', page.replace('<!--initial-result-->', initial));
 }
 
 function send(res, status, type, body) {
@@ -121,6 +160,8 @@ http
       const result = await fetchMarkdown(searchParams.get('url') ?? '');
       return send(res, 200, 'application/json', JSON.stringify(result));
     }
+
+    if (pathname === '/') return serveBrowser(req, res, searchParams.get('url'));
 
     const file = STATIC[pathname];
     if (!file) return send(res, 404, 'text/plain', 'Not found');

@@ -9,6 +9,12 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   A response is shown only if it is one of those types and its body is not an
   HTML document.
 - An address without a scheme tries `https://` first, then `http://`.
+- Clicking a link that turns out not to be Markdown opens it in the same tab
+  as a normal web page, and Back returns to mdbrowse. Cmd-click, Ctrl-click
+  and "Open in new tab" open the link in mdbrowse in a new tab, which goes on
+  to the normal page when it is not Markdown. An address typed into the bar,
+  or a `/?url=` link from another site, shows an error for a non-Markdown page
+  instead, so `/?url=` can't be used to send people to arbitrary sites.
 - When a site's root page has no Markdown, mdbrowse tries the site's
   [`/llms.txt`](https://llmstxt.org) and goes there if it is Markdown.
 - An error response with a Markdown body is shown, with its status code in the

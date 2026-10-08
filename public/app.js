@@ -65,11 +65,21 @@ function render(markdown, baseUrl) {
   for (const img of content.querySelectorAll('img[src]')) {
     img.src = new URL(img.getAttribute('src'), baseUrl).href;
   }
+  // http(s) links point at mdbrowse itself, so opening one in a new tab opens
+  // it in mdbrowse; the document's own URL is kept in data-target.
   for (const a of content.querySelectorAll('a[href]')) {
-    const href = a.getAttribute('href');
+    let target;
     try {
-      a.href = new URL(href, baseUrl).href;
-    } catch {}
+      target = new URL(a.getAttribute('href'), baseUrl);
+    } catch {
+      continue;
+    }
+    if (target.protocol === 'http:' || target.protocol === 'https:') {
+      a.dataset.target = target.href;
+      a.href = `/?url=${encodeURIComponent(target.href)}`;
+    } else {
+      a.href = target.href;
+    }
   }
 }
 
@@ -79,11 +89,6 @@ function showError(result) {
   p.className = 'error';
   p.textContent = result.error;
   content.append(p);
-}
-
-function candidatesFor(input) {
-  const trimmed = input.trim();
-  return /^[a-z][a-z\d+.-]*:\/\//i.test(trimmed) ? [trimmed] : [`https://${trimmed}`, `http://${trimmed}`];
 }
 
 function setLocation(url, push) {
@@ -104,21 +109,23 @@ function isSameDoc(url) {
   return currentUrl && url.split('#')[0] === currentUrl.split('#')[0];
 }
 
-async function load(url, { push = true } = {}) {
+// `handoff` is for followed links: a page that turns out not to be markdown
+// opens in this tab as a normal web page.
+async function load(url, { push = true, handoff = false } = {}) {
+  const previousStatus = status.textContent;
   address.value = url;
-  let result;
-  for (const candidate of candidatesFor(url)) {
-    status.textContent = `Loading ${candidate}…`;
-    const attempt = await fetch(`/api/fetch?url=${encodeURIComponent(candidate)}`).then((r) => r.json());
-    result ??= attempt;
-    if (attempt.ok) {
-      result = attempt;
-      break;
-    }
+  status.textContent = `Loading ${url}…`;
+  const result = await fetch(`/api/fetch?url=${encodeURIComponent(url)}`).then((r) => r.json());
+  if (handoff && !result.ok && result.status) {
+    // Back restores this page from the back/forward cache as it was left.
+    address.value = currentUrl ?? '';
+    status.textContent = previousStatus;
+    return location.assign(result.url);
   }
-  const fragment = url.includes('#') ? url.slice(url.indexOf('#')) : '';
-  if (fragment && !result.url.includes('#')) result.url += fragment;
+  show(result, { push });
+}
 
+function show(result, { push }) {
   setLocation(result.url, push);
 
   if (result.ok) {
@@ -143,16 +150,15 @@ form.addEventListener('submit', (e) => {
 });
 
 content.addEventListener('click', (e) => {
-  const a = e.target.closest('a[href]');
-  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-  const target = new URL(a.href);
-  if (target.protocol !== 'http:' && target.protocol !== 'https:') return;
+  const a = e.target.closest('a[data-target]');
+  if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
   e.preventDefault();
+  const target = new URL(a.dataset.target);
   if (isSameDoc(target.href) && target.hash) {
     setLocation(target.href, target.href !== currentUrl);
     scrollToFragment(target.hash);
   } else {
-    load(target.href);
+    load(target.href, { handoff: true });
   }
 });
 
@@ -186,5 +192,7 @@ window.addEventListener('popstate', (e) => {
 });
 
 const initial = new URLSearchParams(location.search).get('url');
-if (initial) load(initial, { push: false });
+const embedded = document.getElementById('initial-result');
+if (embedded) show(JSON.parse(embedded.textContent), { push: false });
+else if (initial) load(initial, { push: false });
 else showHome();
