@@ -21,7 +21,8 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   status line.
 - Front matter is optional. A `title` is shown as the heading when the
   document has no `# H1`, and `previous`, `home` and `next` appear as links
-  on the right of the status bar.
+  on the right of the status bar, and an `updated`, `last_modified` or
+  `modified` date is shown in the status line in the reader's locale.
 - Raw HTML in a document is sanitized to an allowlist modeled on GitHub's.
 - The start page, at `/`, is [`homepage.md`](homepage.md).
 

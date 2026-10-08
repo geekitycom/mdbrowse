@@ -104,6 +104,18 @@ function renderDocNav(meta, baseUrl) {
   }
 }
 
+// The first of the fields generators use for a last-modified date, in the
+// reader's locale. A bare YYYY-MM-DD is a calendar date, not UTC midnight,
+// which would show as the day before west of Greenwich.
+function updatedDate(meta) {
+  const value = meta.updated ?? meta.last_modified ?? meta.modified;
+  if (!value) return null;
+  const day = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const date = day ? new Date(day[1], day[2] - 1, day[3]) : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString(undefined, { dateStyle: 'medium' });
+}
+
+// Returns the document's front matter.
 function render(markdown, baseUrl) {
   const { meta, body } = splitFrontMatter(markdown);
   content.innerHTML = DOMPurify.sanitize(marked.parse(body), SANITIZE);
@@ -139,6 +151,7 @@ function render(markdown, baseUrl) {
       a.href = target.href;
     }
   }
+  return meta;
 }
 
 function showError(result) {
@@ -188,12 +201,14 @@ function show(result, { push }) {
   setLocation(result.url, push);
 
   if (result.ok) {
+    const meta = render(result.markdown, result.url);
+    const updated = updatedDate(meta);
     status.textContent = [
       result.status >= 400 && `HTTP ${result.status}`,
       result.contentType,
+      updated && `Updated ${updated}`,
       result.fallbackFrom && `no markdown at ${result.fallbackFrom}, showing llms.txt`,
     ].filter(Boolean).join(' · ');
-    render(result.markdown, result.url);
     document.title = content.querySelector('h1')?.textContent || result.url;
     showPosition(result.url);
   } else {
