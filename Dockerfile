@@ -1,5 +1,5 @@
 # Pinned to the Node the project is developed on; `node:24-*` floats.
-ARG NODE_IMAGE=node:24.18.0-trixie-slim
+ARG NODE_IMAGE=node:24.22.1-trixie-slim
 
 FROM ${NODE_IMAGE}
 
