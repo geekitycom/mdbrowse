@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.2.0...mdbrowse-v1.2.1) (2026-10-23)
+
+
+### Bug Fixes
+
+* **deps:** patch dompurify advisories and Node October 2026 CVEs ([de9d5ae](https://github.com/geekitycom/mdbrowse/commit/de9d5ae4ced1204a481f6b9c5bad251e48d901d2))
+
 ## [1.2.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.1.0...mdbrowse-v1.2.0) (2026-10-08)
 
 
