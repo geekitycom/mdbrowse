@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.3.0...mdbrowse-v1.3.1) (2026-10-24)
+
+
+### Bug Fixes
+
+* **docker:** copy alternate.js into the image ([21063e1](https://github.com/geekitycom/mdbrowse/commit/21063e164dcb97a52240f01bcc6a183434032ad8))
+* **docker:** copy alternate.js into the image ([aa58a0c](https://github.com/geekitycom/mdbrowse/commit/aa58a0cda57e15ced39b22c489faaf015333a846))
+
 ## [1.3.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.2.1...mdbrowse-v1.3.0) (2026-10-24)
 
 
