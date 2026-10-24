@@ -207,6 +207,7 @@ function show(result, { push }) {
       result.status >= 400 && `HTTP ${result.status}`,
       result.contentType,
       updated && `Updated ${updated}`,
+      result.alternateOf && `Markdown version of ${result.alternateOf}`,
       result.fallbackFrom && `no markdown at ${result.fallbackFrom}, showing llms.txt`,
     ].filter(Boolean).join(' · ');
     document.title = content.querySelector('h1')?.textContent || result.url;

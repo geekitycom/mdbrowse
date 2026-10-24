@@ -15,6 +15,9 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   to the normal page when it is not Markdown. An address typed into the bar,
   or a `/?url=` link from another site, shows an error for a non-Markdown page
   instead, so `/?url=` can't be used to send people to arbitrary sites.
+- An HTML page that links to a Markdown version of itself with
+  `<link rel="alternate" type="text/markdown" href="...">` in its head shows
+  that version instead.
 - When a site's root page has no Markdown, mdbrowse tries the site's
   [`/llms.txt`](https://llmstxt.org) and goes there if it is Markdown.
 - An error response with a Markdown body is shown, with its status code in the

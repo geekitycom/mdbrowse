@@ -1,6 +1,7 @@
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
+import { markdownAlternate } from './alternate.js';
 import { FetchError, isPublicAddress, readBody, safeGet } from './safe-fetch.js';
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -20,6 +21,7 @@ const STATIC = {
 const MIME = { '.md': 'text/markdown; charset=utf-8', '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css' };
 
 const MARKDOWN_TYPES = new Set(['text/markdown', 'text/x-markdown', 'text/plain']);
+const HTML_TYPES = new Set(['text/html', 'application/xhtml+xml']);
 
 function looksLikeHtml(body) {
   const head = body.slice(0, 1024).replace(/^﻿/, '').replace(/^\s*(<!--[\s\S]*?-->\s*)*/, '').toLowerCase();
@@ -67,7 +69,10 @@ async function fetchOne(target) {
   };
 
   if (contentType && !MARKDOWN_TYPES.has(contentType)) {
-    return fail(`Not markdown: server returned ${contentType}.`);
+    const error = `Not markdown: server returned ${contentType}.`;
+    if (!ok || !HTML_TYPES.has(contentType)) return fail(error);
+    const alternate = await readBody(res, MAX_BYTES).then((html) => markdownAlternate(html, finalUrl), () => null);
+    return { ...fail(error), alternate };
   }
   if (Number(res.headers['content-length']) > MAX_BYTES) {
     return fail('Document is larger than 5 MB.');
@@ -80,10 +85,20 @@ async function fetchOne(target) {
     return { ok: false, url: finalUrl.href, status, error: failedTo(err) };
   }
   if (looksLikeHtml(markdown)) {
-    return fail(`Not markdown: ${contentType || 'response'} body is an HTML document.`);
+    const error = `Not markdown: ${contentType || 'response'} body is an HTML document.`;
+    return { ...fail(error), alternate: ok && markdownAlternate(markdown, finalUrl) };
   }
   if (!ok && !markdown.trim()) return fail();
   return { ok: true, url: finalUrl.href, status, contentType: contentType || 'unknown', markdown };
+}
+
+// An HTML page can point to its Markdown version with
+// <link rel="alternate" type="text/markdown">, which is shown in its place.
+async function fetchPage(target) {
+  const { alternate, ...result } = await fetchOne(target);
+  if (!alternate) return result;
+  const { alternate: _, ...markdown } = await fetchOne(alternate);
+  return markdown.ok && markdown.status < 300 ? { ...markdown, alternateOf: result.url } : result;
 }
 
 function isSiteRoot(target) {
@@ -99,7 +114,7 @@ function isSiteRoot(target) {
 // /llms.txt (https://llmstxt.org), so a root that answered with something
 // else falls back to that.
 async function fetchSite(target) {
-  const result = await fetchOne(target);
+  const result = await fetchPage(target);
   if (result.ok || !result.status || !isSiteRoot(target)) return result;
   const llms = await fetchOne(new URL('/llms.txt', result.url).href);
   return llms.ok && llms.status < 300 ? { ...llms, fallbackFrom: result.url } : result;
