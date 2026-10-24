@@ -17,6 +17,7 @@ Each link goes to the site's homepage. mdbrowse shows its Markdown version when 
 - [Escaped localhost](https://jlopes.eu/)
 - [Joost.blog](https://joost.blog/)
 - [Kevin Drum](https://jabberwocking.com/)
+- [Latent Mirror](https://latentmirror.com/)
 - [Lever Time - The Lever](https://www.levernews.com/)
 - [Rambler's Rest](https://gurupanguji.com/)
 - [Remkus de Vries](https://remkusdevries.com/)
