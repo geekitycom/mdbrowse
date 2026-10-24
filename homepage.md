@@ -4,36 +4,23 @@ On October 6, 2026, Dave Winer posted ["The web of Markdown"](http://scripting.c
 
 Parts of it are already here, built for AI. Sites that want LLM crawlers to read them often serve a Markdown version of a page when it is requested with an `Accept: text/markdown` header. Many also publish an [llms.txt](https://llmstxt.org/llms.txt) file, a Markdown overview of the site with links to its main pages. mdbrowse asks for Markdown on every request, so those sites can be read here as they are.
 
-This list is a look at how much of that web already exists among the sites in Dave's blogroll. 
+This list is a look at how much of that web already exists. It started with the sites in Dave's blogroll and has grown with blogs found in other directories. Each one's Markdown links on to more Markdown, so you can keep reading without leaving mdbrowse.
 
-Each link goes to the site's Markdown homepage when it has one, and to its `/llms.txt` otherwise.
+Each link goes to the site's homepage. mdbrowse shows its Markdown version when the site serves one or points to one with `<link rel="alternate" type="text/markdown">`, and its `/llms.txt` otherwise.
 
-- [A Smart Bear](https://longform.asmartbear.com/llms.txt)
-- [Andrew Shell's Weblog](https://andrewshell.org/llms.txt)
-- [blog.lmorchard.com](https://blog.lmorchard.com/llms.txt)
-- [Buttondown's blog](https://buttondown.com)
-- [Coywolf](https://coywolf.com/llms.txt)
-- [Cursor - All Updates](https://cursor.com/llms.txt)
-- [emptywheel](https://emptywheel.net/llms.txt)
-- [Freshly Pressed - WordPress.com](https://wordpress.com/llms.txt)
-- [frontier.root updates](https://github.com/llms.txt)
-- [Jeffrey Zeldman Presents](https://zeldman.com/llms.txt)
-- [Jonathan Desrosiers](https://jonathandesrosiers.com/llms.txt)
+- [A Smart Bear](https://longform.asmartbear.com/)
+- [Andrew Shell's Weblog](https://andrewshell.org/)
+- [blog.lmorchard.com](https://blog.lmorchard.com/)
+- [Cailin Pitt](https://cailinpitt.com/)
+- [Coywolf](https://coywolf.com/)
+- [Dirk Primbs Unprompted](https://unprompted.dirkprimbs.de/)
+- [Escaped localhost](https://jlopes.eu/)
 - [Joost.blog](https://joost.blog/)
 - [Kevin Drum](https://jabberwocking.com/)
-- [kottke.org](https://kottke.org/llms.txt)
-- [Lever Time - The Lever](https://www.levernews.com/llms.txt)
-- [Nelio Software](https://neliosoftware.com/)
-- [Open Channels FM Podcast Network](https://openchannels.fm/llms.txt)
-- [Radar](https://www.oreilly.com/llms.txt)
-- [Remkus de Vries](https://remkusdevries.com/llms.txt)
+- [Latent Mirror](https://latentmirror.com/)
+- [Lever Time - The Lever](https://www.levernews.com/)
+- [Rambler's Rest](https://gurupanguji.com/)
+- [Remkus de Vries](https://remkusdevries.com/)
 - [Rich Tabor](https://richtabor.com/)
-- [SCOTUSblog](https://www.scotusblog.com/)
 - [The Every Podcast](https://every.to/)
-- [The San Francisco Standard](https://sfstandard.com/)
-- [Thejesh GN](https://thejeshgn.com/llms.txt)
-- [Threads Archives - Meta Newsroom](https://about.fb.com/llms.txt)
 - [TorrentFreak](https://torrentfreak.com/)
-- [WordPress Developer Blog](https://developer.wordpress.org/news)
-- [WordPress Developer Resources - Developer.WordPress.org](https://developer.wordpress.org)
-- [WordPress.com Blog](https://wordpress.com/llms.txt)
