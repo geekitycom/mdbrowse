@@ -33,7 +33,6 @@ Each link goes to the site's Markdown homepage when it has one, and to its `/llm
 - [The Every Podcast](https://every.to/)
 - [The San Francisco Standard](https://sfstandard.com/)
 - [Thejesh GN](https://thejeshgn.com/llms.txt)
-- [Threads Archives - Meta Newsroom](https://about.fb.com/llms.txt)
 - [TorrentFreak](https://torrentfreak.com/)
 - [WordPress Developer Blog](https://developer.wordpress.org/news)
 - [WordPress Developer Resources - Developer.WordPress.org](https://developer.wordpress.org)
