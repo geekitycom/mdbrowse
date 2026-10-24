@@ -14,7 +14,7 @@ Each link goes to the site's Markdown homepage when it has one, and to its `/llm
 - [Buttondown's blog](https://buttondown.com)
 - [Coywolf](https://coywolf.com/llms.txt)
 - [Cursor - All Updates](https://cursor.com/llms.txt)
-- [Dirk Primbs Unprompted](https://unprompted.dirkprimbs.de/llms.txt)
+- [Dirk Primbs Unprompted](https://unprompted.dirkprimbs.de/)
 - [emptywheel](https://emptywheel.net/llms.txt)
 - [Freshly Pressed - WordPress.com](https://wordpress.com/llms.txt)
 - [frontier.root updates](https://github.com/llms.txt)
