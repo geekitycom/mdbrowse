@@ -9,7 +9,7 @@ This list is a look at how much of that web already exists among the sites in Da
 Each link goes to the site's Markdown homepage when it has one, and to its `/llms.txt` otherwise.
 
 - [A Smart Bear](https://longform.asmartbear.com/llms.txt)
-- [Andrew Shell's Weblog](https://andrewshell.org/llms.txt)
+- [Andrew Shell's Weblog](https://andrewshell.org/)
 - [blog.lmorchard.com](https://blog.lmorchard.com/llms.txt)
 - [Buttondown's blog](https://buttondown.com)
 - [Coywolf](https://coywolf.com/llms.txt)
