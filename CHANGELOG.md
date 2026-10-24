@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.2.1...mdbrowse-v1.3.0) (2026-10-24)
+
+
+### Features
+
+* follow &lt;link rel="alternate" type="text/markdown"&gt; on HTML pages ([a9a2be1](https://github.com/geekitycom/mdbrowse/commit/a9a2be1563b0acd36adc20c72fbc212fea32efc6))
+* follow &lt;link rel="alternate" type="text/markdown"&gt; on HTML pages ([032db0b](https://github.com/geekitycom/mdbrowse/commit/032db0bd759493729a3d0b7e4fd2937d04064eb4))
+
 ## [1.2.1](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.2.0...mdbrowse-v1.2.1) (2026-10-23)
 
 
