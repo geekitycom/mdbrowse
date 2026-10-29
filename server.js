@@ -12,6 +12,7 @@ const isAllowed = process.env.MDBROWSE_ALLOW_PRIVATE === 'true' ? () => true : i
 
 const STATIC = {
   '/app.js': 'public/app.js',
+  '/sanitize.js': 'public/sanitize.js',
   '/homepage.md': 'homepage.md',
   '/vendor/marked.js': 'node_modules/marked/lib/marked.esm.js',
   '/vendor/purify.js': 'node_modules/dompurify/dist/purify.es.mjs',
