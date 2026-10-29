@@ -89,23 +89,29 @@ push to `main`. It keeps a release pull request open that bumps the version in
 - Other types, such as `build:`, `ci:` and `docs:`, do not make a release on
   their own.
 
-Merging the release pull request tags the version and creates the GitHub
-release. It does not publish a Docker image. See the next section.
+Merging the release pull request tags the version, creates the GitHub release
+and publishes the Docker image. See the next section.
 
 ## Publishing the Docker image
 
-The image is built and pushed by hand, because GitHub's hosted runners are
-amd64 only and the server may be arm64. The build script makes one image for
-`linux/amd64` and `linux/arm64`.
+When release-please creates a release, the `publish-image` job in
+[`.github/workflows/release-please.yml`](.github/workflows/release-please.yml)
+builds the image for `linux/amd64` and `linux/arm64` from the release tag and
+pushes `ghcr.io/geekitycom/mdbrowse:<version>` and
+`ghcr.io/geekitycom/mdbrowse:latest`. It logs in with the workflow's
+`GITHUB_TOKEN`, so the package must grant this repository write access: in the
+package's settings on GitHub, under "Manage Actions access", add
+`geekitycom/mdbrowse` with the Write role.
 
-1. Merge the release pull request.
-2. Update your local `main`:
+To build and push by hand instead, for example to push an extra tag:
+
+1. Update your local `main`:
 
    ```sh
    git pull
    ```
 
-3. Build and push:
+2. Build and push:
 
    ```sh
    pnpm docker:build-push

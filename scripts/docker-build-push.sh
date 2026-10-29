@@ -3,13 +3,14 @@
 # Build the mdbrowse image for linux/amd64 and linux/arm64 and push it to the
 # GitHub Container Registry as ghcr.io/geekitycom/mdbrowse.
 #
-# This runs by hand, not in CI: GitHub's runners are amd64 only and the server
-# may be arm64, so buildx builds both here and pushes them as one manifest list.
+# Releases are published by the publish-image job in
+# .github/workflows/release-please.yml. This script is for pushing by hand, for
+# example with a custom tag; buildx builds both platforms and pushes them as one
+# manifest list.
 #
 # The version tag comes from package.json, which release-please bumps when its
-# release pull request is merged. The usual order is: merge the release pull
-# request, `git pull` on main, then run this. `latest` is pushed alongside the
-# version, and so is a custom tag when one is given.
+# release pull request is merged. `latest` is pushed alongside the version, and
+# so is a custom tag when one is given.
 #
 # Usage (from the repository root):
 #
