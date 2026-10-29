@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.3.1...mdbrowse-v1.4.0) (2026-10-29)
+
+
+### Features
+
+* keep gemini and other safe non-web links in documents ([6d2b3a9](https://github.com/geekitycom/mdbrowse/commit/6d2b3a96454e0a2a9b4703ecfa9297e1a196308e))
+
 ## [1.3.1](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.3.0...mdbrowse-v1.3.1) (2026-10-24)
 
 
