@@ -1,6 +1,7 @@
 import { marked } from '/vendor/marked.js';
 import DOMPurify from '/vendor/purify.js';
 import { SANITIZE } from '/sanitize.js';
+import { fillPlaceholders, splitFrontMatter } from '/front-matter.js';
 
 marked.setOptions({ gfm: true });
 
@@ -36,21 +37,6 @@ function scrollToFragment(hash) {
   const key = `user-content-${decodeURIComponent(hash.slice(1))}`;
   const el = document.getElementById(key) ?? document.getElementsByName(key)[0];
   el?.scrollIntoView();
-}
-
-const FRONT_MATTER = /^\uFEFF?---\r?\n([\s\S]*?)\r?\n---\r?\n/;
-
-// Only top-level `key: value` lines are read; nested fields and lists are
-// skipped, since the fields used here are all plain strings.
-function splitFrontMatter(markdown) {
-  const match = markdown.match(FRONT_MATTER);
-  if (!match) return { meta: {}, body: markdown };
-  const meta = {};
-  for (const line of match[1].split(/\r?\n/)) {
-    const field = line.match(/^([A-Za-z_][\w-]*):\s*(.+?)\s*$/);
-    if (field) meta[field[1]] = field[2].replace(/^(['"])(.*)\1$/, '$2');
-  }
-  return { meta, body: markdown.slice(match[0].length) };
 }
 
 const DOC_NAV = [
@@ -101,7 +87,7 @@ function updatedDate(meta) {
 // Returns the document's front matter.
 function render(markdown, baseUrl) {
   const { meta, body } = splitFrontMatter(markdown);
-  content.innerHTML = DOMPurify.sanitize(marked.parse(body), SANITIZE);
+  content.innerHTML = DOMPurify.sanitize(marked.parse(fillPlaceholders(body, meta)), SANITIZE);
 
   if (meta.title && !content.querySelector('h1')) {
     const h1 = document.createElement('h1');
