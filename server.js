@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { markdownAlternate } from './alternate.js';
+import { isMarkdownType } from './markdown-type.js';
 import { FetchError, isPublicAddress, readBody, safeGet } from './safe-fetch.js';
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -22,7 +23,6 @@ const STATIC = {
 
 const MIME = { '.md': 'text/markdown; charset=utf-8', '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css' };
 
-const MARKDOWN_TYPES = new Set(['text/markdown', 'text/x-markdown', 'text/plain']);
 const HTML_TYPES = new Set(['text/html', 'application/xhtml+xml']);
 
 function looksLikeHtml(body) {
@@ -30,7 +30,9 @@ function looksLikeHtml(body) {
   return /^<(!doctype html|html|head|body)[\s>]/.test(head);
 }
 
-async function fetchOne(target) {
+// `linkedAsMarkdown` is for a page's Markdown alternate, which the page has
+// already said is Markdown, so it is read as Markdown when served as text/plain.
+async function fetchOne(target, { linkedAsMarkdown = false } = {}) {
   let url;
   try {
     url = new URL(target);
@@ -70,7 +72,8 @@ async function fetchOne(target) {
     return { ok: false, url: finalUrl.href, status, error: ok ? error : `Server responded ${status} ${res.statusMessage}.` };
   };
 
-  if (contentType && !MARKDOWN_TYPES.has(contentType)) {
+  const plainLinkedAsMarkdown = linkedAsMarkdown && contentType === 'text/plain';
+  if (!plainLinkedAsMarkdown && !isMarkdownType(contentType, finalUrl.href)) {
     const error = `Not markdown: server returned ${contentType}.`;
     if (!ok || !HTML_TYPES.has(contentType)) return fail(error);
     const alternate = await readBody(res, MAX_BYTES).then((html) => markdownAlternate(html, finalUrl), () => null);
@@ -99,7 +102,7 @@ async function fetchOne(target) {
 async function fetchPage(target) {
   const { alternate, ...result } = await fetchOne(target);
   if (!alternate) return result;
-  const { alternate: _, ...markdown } = await fetchOne(alternate);
+  const { alternate: _, ...markdown } = await fetchOne(alternate, { linkedAsMarkdown: true });
   return markdown.ok && markdown.status < 300 ? { ...markdown, alternateOf: result.url } : result;
 }
 

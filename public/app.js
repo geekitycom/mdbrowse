@@ -130,6 +130,19 @@ function showError(result) {
   p.className = 'error';
   p.textContent = result.error;
   content.append(p);
+  if (result.status) content.append(pageLink(result.url));
+}
+
+// A plain link to a page mdbrowse can't show, so it can be opened in the
+// browser as a normal page.
+function pageLink(url) {
+  const target = new URL(url);
+  if (target.protocol !== 'http:' && target.protocol !== 'https:') return '';
+  const p = document.createElement('p');
+  const a = document.createElement('a');
+  a.href = a.textContent = target.href;
+  p.append(a);
+  return p;
 }
 
 function setLocation(url, push) {

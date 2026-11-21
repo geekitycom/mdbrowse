@@ -7,14 +7,17 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
 
 - Requests send `Accept: text/markdown, text/x-markdown;q=0.9, text/plain;q=0.8`.
   A response is shown only if it is one of those types and its body is not an
-  HTML document.
+  HTML document. A `text/plain` response counts only when its file name ends
+  in `.md` or `.markdown`, or is `llms.txt` or `llms-full.txt`, since the
+  llms.txt format is Markdown but sites serve it as `text/plain`.
 - An address without a scheme tries `https://` first, then `http://`.
 - Clicking a link that turns out not to be Markdown opens it in the same tab
   as a normal web page, and Back returns to mdbrowse. Cmd-click, Ctrl-click
   and "Open in new tab" open the link in mdbrowse in a new tab, which goes on
   to the normal page when it is not Markdown. An address typed into the bar,
   or a `/?url=` link from another site, shows an error for a non-Markdown page
-  instead, so `/?url=` can't be used to send people to arbitrary sites.
+  instead, so `/?url=` can't be used to send people to arbitrary sites. The
+  error has a plain link to the page, to open it in the browser.
 - An HTML page that links to a Markdown version of itself with
   `<link rel="alternate" type="text/markdown" href="...">` in its head shows
   that version instead.
