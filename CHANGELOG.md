@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.4.0...mdbrowse-v1.5.0) (2026-11-21)
+
+
+### Features
+
+* fill {{ page.field }} placeholders from front matter ([a6678df](https://github.com/geekitycom/mdbrowse/commit/a6678dfc5ac63aacab2dba38be8b0344e0673b0c))
+
 ## [1.4.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.3.1...mdbrowse-v1.4.0) (2026-10-29)
 
 
