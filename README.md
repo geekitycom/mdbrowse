@@ -26,6 +26,10 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   document has no `# H1`, and `previous`, `home` and `next` appear as links
   on the right of the status bar, and an `updated`, `last_modified` or
   `modified` date is shown in the status line in the reader's locale.
+- A `{{ page.key }}` placeholder in the body, as Jekyll writes them, is
+  replaced by that front matter value. A nested field is reached with a dotted
+  path, such as `{{ page.source.title }}`. A placeholder whose field is missing
+  is left as written.
 - Raw HTML in a document is sanitized to an allowlist modeled on GitHub's.
 - The start page, at `/`, is [`homepage.md`](homepage.md).
 
