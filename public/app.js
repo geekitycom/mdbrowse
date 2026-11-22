@@ -1,7 +1,7 @@
 import { marked } from '/vendor/marked.js';
 import DOMPurify from '/vendor/purify.js';
 import { SANITIZE } from '/sanitize.js';
-import { fillPlaceholders, splitFrontMatter } from '/front-matter.js';
+import { fillPlaceholders, frontMatterFeeds, isReadableFeedType, splitFrontMatter } from '/front-matter.js';
 
 marked.setOptions({ gfm: true });
 
@@ -21,6 +21,8 @@ const address = document.getElementById('address');
 const status = document.getElementById('status');
 const docNav = document.getElementById('doc-nav');
 const content = document.getElementById('content');
+const feedsButton = document.getElementById('feeds');
+const feedMenu = document.getElementById('feed-menu');
 
 const HOME_SOURCE = new URL('/homepage.md', location.origin).href;
 
@@ -45,32 +47,64 @@ const DOC_NAV = [
   ['next', 'next', 'Next'],
 ];
 
+// An absolute http(s) URL for url, or null. Links built from front matter or
+// a feed bypass the sanitizer, so only these are linked.
+function httpTarget(url, baseUrl) {
+  if (!url) return null;
+  try {
+    const target = new URL(url, baseUrl);
+    return target.protocol === 'http:' || target.protocol === 'https:' ? target.href : null;
+  } catch {
+    return null;
+  }
+}
+
+// An http(s) link that opens in mdbrowse, like links in a document.
+function appLink(text, target) {
+  const a = document.createElement('a');
+  a.dataset.target = target;
+  a.href = `/?url=${encodeURIComponent(target)}`;
+  a.textContent = text;
+  return a;
+}
+
 // Links between documents named in front matter (previous, home, next), shown
-// in the status bar. They bypass the sanitizer, so only http(s) targets are kept.
+// in the status bar.
 function renderDocNav(meta, baseUrl) {
   docNav.replaceChildren();
   for (const [field, rel, label] of DOC_NAV) {
-    if (!meta[field]) continue;
-    let target;
-    try {
-      target = new URL(meta[field], baseUrl);
-    } catch {
-      continue;
-    }
-    if (target.protocol !== 'http:' && target.protocol !== 'https:') continue;
+    const target = httpTarget(meta[field], baseUrl);
+    if (!target) continue;
     if (docNav.childElementCount) {
       const sep = document.createElement('span');
       sep.className = 'sep';
       sep.textContent = '·';
       docNav.append(sep);
     }
-    const a = document.createElement('a');
+    const a = appLink(label, target);
     a.rel = rel;
-    a.dataset.target = target.href;
-    a.href = `/?url=${encodeURIComponent(target.href)}`;
-    a.textContent = label;
     docNav.append(a);
   }
+}
+
+// The feeds a document lists in its front matter that mdbrowse can show, in
+// the menu opened by the feed button, which is hidden when there are none.
+// Atom and JSON feeds are left out, since they would only open an error.
+function renderFeedMenu(feeds, baseUrl) {
+  const items = [];
+  for (const feed of feeds) {
+    const target = httpTarget(feed.url, baseUrl);
+    if (!target || !isReadableFeedType(feed.type)) continue;
+    const a = appLink(feed.title ?? target, target);
+    a.rel = 'alternate';
+    if (feed.type) a.type = feed.type;
+    const li = document.createElement('li');
+    li.append(a);
+    items.push(li);
+  }
+  if (feedMenu.matches(':popover-open')) feedMenu.hidePopover();
+  feedMenu.querySelector('ul').replaceChildren(...items);
+  feedsButton.hidden = !items.length;
 }
 
 // The first of the fields generators use for a last-modified date, in the
@@ -84,48 +118,124 @@ function updatedDate(meta) {
   return Number.isNaN(date.getTime()) ? null : date.toLocaleDateString(undefined, { dateStyle: 'medium' });
 }
 
+const markdownHtml = (markdown) => DOMPurify.sanitize(marked.parse(markdown), SANITIZE);
+
+// Some generators write HTML entities into titles.
+const decodeEntities = (text) => new DOMParser().parseFromString(text, 'text/html').body.textContent;
+
 // Returns the document's front matter.
 function render(markdown, baseUrl) {
   const { meta, body } = splitFrontMatter(markdown);
-  content.innerHTML = DOMPurify.sanitize(marked.parse(fillPlaceholders(body, meta)), SANITIZE);
+  content.innerHTML = markdownHtml(fillPlaceholders(body, meta));
 
   if (meta.title && !content.querySelector('h1')) {
     const h1 = document.createElement('h1');
-    // Some generators write HTML entities into the title.
-    h1.textContent = new DOMParser().parseFromString(meta.title, 'text/html').body.textContent;
+    h1.textContent = decodeEntities(meta.title);
     content.prepend(h1);
   }
   renderDocNav(meta, baseUrl);
+  renderFeedMenu(frontMatterFeeds(meta), baseUrl);
+  addHeadingIds();
+  resolveUrls(content, baseUrl);
+  return meta;
+}
 
+// A feed's items in feed order, each with its title linked to its page. An
+// item's body is shown only when the feed has it as Markdown; an item with
+// no title is linked by its date instead.
+function renderFeed(feed, feedUrl) {
+  content.replaceChildren();
+  docNav.replaceChildren();
+  renderFeedMenu([]);
+  const h1 = document.createElement('h1');
+  h1.append(feed.title ? linkTo(decodeEntities(feed.title), feed.link, feedUrl) : feedUrl);
+  content.append(h1);
+  if (feed.description) {
+    const p = document.createElement('p');
+    p.textContent = decodeEntities(feed.description);
+    content.append(p);
+  }
+  for (const item of feed.items) {
+    const article = document.createElement('article');
+    article.className = 'feed-item';
+    if (item.title) {
+      const h2 = document.createElement('h2');
+      h2.append(linkTo(decodeEntities(item.title), item.link, feedUrl));
+      article.append(h2);
+    }
+    if (item.markdown) {
+      const body = document.createElement('div');
+      body.innerHTML = markdownHtml(item.markdown);
+      resolveUrls(body, itemBase(item.link, feedUrl));
+      article.append(body);
+    }
+    if (!item.title && item.link) {
+      const p = document.createElement('p');
+      p.className = 'feed-permalink';
+      p.append(linkTo(feedDate(item.date) ?? item.link, item.link, feedUrl));
+      article.append(p);
+    }
+    content.append(article);
+  }
+  addHeadingIds();
+}
+
+// Text linked to url, or the bare text when url is not http(s).
+function linkTo(text, url, baseUrl) {
+  const target = httpTarget(url, baseUrl);
+  return target ? appLink(text, target) : text;
+}
+
+// Relative URLs in an item's Markdown resolve against the item's own page.
+function itemBase(link, feedUrl) {
+  if (!link) return feedUrl;
+  try {
+    return new URL(link, feedUrl).href;
+  } catch {
+    return feedUrl;
+  }
+}
+
+function feedDate(value) {
+  const date = new Date(value);
+  return value && !Number.isNaN(date.getTime()) ? date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : null;
+}
+
+function addHeadingIds() {
   const seen = new Map();
   for (const h of content.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
     if (!h.id) h.id = `user-content-${slugify(h.textContent, seen)}`;
   }
-  for (const img of content.querySelectorAll('img[src]')) {
+}
+
+function resolveUrls(root, baseUrl) {
+  for (const img of root.querySelectorAll('img[src]')) {
     img.src = new URL(img.getAttribute('src'), baseUrl).href;
   }
-  // http(s) links point at mdbrowse itself, so opening one in a new tab opens
-  // it in mdbrowse; the document's own URL is kept in data-target.
-  for (const a of content.querySelectorAll('a[href]')) {
-    let target;
-    try {
-      target = new URL(a.getAttribute('href'), baseUrl);
-    } catch {
-      continue;
-    }
-    if (target.protocol === 'http:' || target.protocol === 'https:') {
-      a.dataset.target = target.href;
-      a.href = `/?url=${encodeURIComponent(target.href)}`;
-    } else {
-      a.href = target.href;
-    }
+  for (const a of root.querySelectorAll('a[href]')) pointLink(a, a.getAttribute('href'), baseUrl);
+}
+
+// http(s) links point at mdbrowse itself, so opening one in a new tab opens
+// it in mdbrowse; the document's own URL is kept in data-target.
+function pointLink(a, href, baseUrl) {
+  let target;
+  try {
+    target = new URL(href, baseUrl);
+  } catch {
+    return;
   }
-  return meta;
+  if (target.protocol === 'http:' || target.protocol === 'https:') {
+    a.dataset.target = target.href;
+    a.href = `/?url=${encodeURIComponent(target.href)}`;
+  } else {
+    a.href = target.href;
+  }
 }
 
 function showError(result) {
   content.replaceChildren();
   docNav.replaceChildren();
+  renderFeedMenu([]);
   const p = document.createElement('p');
   p.className = 'error';
   p.textContent = result.error;
@@ -183,7 +293,9 @@ function show(result, { push }) {
   setLocation(result.url, push);
 
   if (result.ok) {
-    const meta = render(result.markdown, result.url);
+    let meta = {};
+    if (result.feed) renderFeed(result.feed, result.url);
+    else meta = render(result.markdown, result.url);
     const updated = updatedDate(meta);
     status.textContent = [
       result.status >= 400 && `HTTP ${result.status}`,
@@ -221,6 +333,18 @@ function followLink(e) {
 
 content.addEventListener('click', followLink);
 docNav.addEventListener('click', followLink);
+feedMenu.addEventListener('click', (e) => {
+  followLink(e);
+  if (e.target.closest('a')) feedMenu.hidePopover();
+});
+
+// The menu sits in the top layer, so it is placed under the button when it opens.
+feedMenu.addEventListener('beforetoggle', (e) => {
+  if (e.newState !== 'open') return;
+  const { bottom, right } = feedsButton.getBoundingClientRect();
+  feedMenu.style.top = `${bottom + 4}px`;
+  feedMenu.style.right = `${document.documentElement.clientWidth - right}px`;
+});
 
 document.getElementById('back').addEventListener('click', () => history.back());
 document.getElementById('forward').addEventListener('click', () => history.forward());

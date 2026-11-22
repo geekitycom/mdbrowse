@@ -26,6 +26,13 @@
     .error { color: var(--err); }
     .markdown-body { background: transparent; font-size: 17px; line-height: 1.65; }
     .markdown-body [id], .markdown-body [name] { scroll-margin-top: 80px; }
+    #feed-menu { position: fixed; inset: auto; margin: 0; padding: 4px 0; max-width: min(24rem, 90vw); font-size: 14px; border: 1px solid var(--border); border-radius: 6px; background: Canvas; color: CanvasText; box-shadow: 0 8px 24px rgb(0 0 0 / 0.15); }
+    #feed-menu ul { margin: 0; padding: 0; list-style: none; }
+    #feed-menu a { display: block; padding: 6px 12px; overflow: hidden; color: var(--link); text-decoration: none; text-overflow: ellipsis; white-space: nowrap; }
+    #feed-menu a:hover, #feed-menu a:focus-visible { background: var(--bar); }
+    .markdown-body .feed-item { padding: 8px 0; border-top: 1px solid var(--border); }
+    .markdown-body .feed-item h2 { border-bottom: 0; }
+    .markdown-body .feed-permalink { font-size: 14px; }
   </style>
 </head>
 <body>
@@ -36,8 +43,12 @@
     <form id="nav" style="display:contents">
       <input id="address" type="text" inputmode="url" placeholder="https://example.com/README.md" autocomplete="off" spellcheck="false" autofocus>
     </form>
+    <button id="feeds" title="Feeds" popovertarget="feed-menu" hidden>
+      <svg width="14" height="14" viewBox="0 0 8 8" aria-hidden="true"><circle cx="1" cy="7" r="1" fill="#f26522"/><path d="M0 3a5 5 0 0 1 5 5M0 0a8 8 0 0 1 8 8" fill="none" stroke="#f26522" stroke-width="1.4"/></svg>
+    </button>
     <button id="home" title="Home">&#x2302;</button>
   </header>
+  <nav id="feed-menu" popover aria-label="Feeds"><ul></ul></nav>
   <div id="status-bar"><span id="status"></span><nav id="doc-nav"></nav></div>
   <main><article id="content" class="markdown-body"></article></main>
   <!--initial-result-->

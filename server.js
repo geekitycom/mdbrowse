@@ -2,6 +2,7 @@ import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { markdownAlternate } from './alternate.js';
+import { FEED_TYPES, parseRss } from './feed.js';
 import { isMarkdownType } from './markdown-type.js';
 import { FetchError, isPublicAddress, readBody, safeGet } from './safe-fetch.js';
 
@@ -75,6 +76,10 @@ async function fetchOne(target, { linkedAsMarkdown = false } = {}) {
   const plainLinkedAsMarkdown = linkedAsMarkdown && contentType === 'text/plain';
   if (!plainLinkedAsMarkdown && !isMarkdownType(contentType, finalUrl.href)) {
     const error = `Not markdown: server returned ${contentType}.`;
+    if (ok && FEED_TYPES.has(contentType)) {
+      const feed = await readBody(res, MAX_BYTES).then(parseRss, () => null);
+      return feed ? { ok: true, url: finalUrl.href, status, contentType, feed } : fail(error);
+    }
     if (!ok || !HTML_TYPES.has(contentType)) return fail(error);
     const alternate = await readBody(res, MAX_BYTES).then((html) => markdownAlternate(html, finalUrl), () => null);
     return { ...fail(error), alternate };

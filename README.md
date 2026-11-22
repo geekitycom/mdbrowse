@@ -18,6 +18,12 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   or a `/?url=` link from another site, shows an error for a non-Markdown page
   instead, so `/?url=` can't be used to send people to arbitrary sites. The
   error has a plain link to the page, to open it in the browser.
+- An RSS 2.0 feed, served as `application/rss+xml`, `text/xml` or
+  `application/xml`, is shown as a list of its items in feed order, each
+  with its title linked to its page, or its date when it has no title. An
+  item's body is shown only when the feed carries it as Markdown in
+  [`<source:markdown>`](https://source.scripting.com); HTML descriptions
+  are never shown. Other XML is not Markdown.
 - An HTML page that links to a Markdown version of itself with
   `<link rel="alternate" type="text/markdown" href="...">` in its head shows
   that version instead.
@@ -29,6 +35,23 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   document has no `# H1`, and `previous`, `home` and `next` appear as links
   on the right of the status bar, and an `updated`, `last_modified` or
   `modified` date is shown in the status line in the reader's locale.
+- A document lists its feeds in a `feeds` list in its front matter, the
+  equivalent of HTML's `<link rel="alternate" type="application/rss+xml">`.
+  Each entry has a `url`, relative to the document or absolute, and an
+  optional `title` and `type`. When a document lists feeds, an RSS button
+  appears next to Home; it opens a menu of the feeds, each labelled with its
+  `title` or its URL. Only feeds mdbrowse can show are listed: those whose
+  `type` is RSS (or a generic XML type) or that have no `type`. Atom and
+  JSON feeds are left out:
+
+  ```yaml
+  feeds:
+    - url: /feed/
+      title: Andrew Shell's Weblog
+      type: application/rss+xml
+    - url: /comments/feed/
+      title: Comments
+  ```
 - A `{{ page.key }}` placeholder in the body, as Jekyll writes them, is
   replaced by that front matter value. A nested field is reached with a dotted
   path, such as `{{ page.source.title }}`. A placeholder whose field is missing
