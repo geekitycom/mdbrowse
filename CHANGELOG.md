@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.6.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.5.0...mdbrowse-v1.6.0) (2026-11-22)
+
+
+### Features
+
+* link feeds listed in front matter ([4c91dad](https://github.com/geekitycom/mdbrowse/commit/4c91dad3befb7ba4c5c30d8b130e1ef01665512d))
+* link to pages mdbrowse can't show, and only read text/plain as markdown by name ([0582802](https://github.com/geekitycom/mdbrowse/commit/0582802ed0f680fc44752af1c71d7d4a1b8bfef9))
+* show rss 2.0 feeds, with item bodies from source:markdown ([455f519](https://github.com/geekitycom/mdbrowse/commit/455f519e13aa370fdc80cf9ca1d6c86fe7bc6ec5))
+
 ## [1.5.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.4.0...mdbrowse-v1.5.0) (2026-11-21)
 
 
