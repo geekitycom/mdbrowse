@@ -1,7 +1,7 @@
 import { marked } from '/vendor/marked.js';
 import DOMPurify from '/vendor/purify.js';
 import { SANITIZE } from '/sanitize.js';
-import { fillPlaceholders, splitFrontMatter } from '/front-matter.js';
+import { fillPlaceholders, frontMatterFeeds, isReadableFeedType, splitFrontMatter } from '/front-matter.js';
 
 marked.setOptions({ gfm: true });
 
@@ -21,6 +21,8 @@ const address = document.getElementById('address');
 const status = document.getElementById('status');
 const docNav = document.getElementById('doc-nav');
 const content = document.getElementById('content');
+const feedsButton = document.getElementById('feeds');
+const feedMenu = document.getElementById('feed-menu');
 
 const HOME_SOURCE = new URL('/homepage.md', location.origin).href;
 
@@ -85,6 +87,26 @@ function renderDocNav(meta, baseUrl) {
   }
 }
 
+// The feeds a document lists in its front matter that mdbrowse can show, in
+// the menu opened by the feed button, which is hidden when there are none.
+// Atom and JSON feeds are left out, since they would only open an error.
+function renderFeedMenu(feeds, baseUrl) {
+  const items = [];
+  for (const feed of feeds) {
+    const target = httpTarget(feed.url, baseUrl);
+    if (!target || !isReadableFeedType(feed.type)) continue;
+    const a = appLink(feed.title ?? target, target);
+    a.rel = 'alternate';
+    if (feed.type) a.type = feed.type;
+    const li = document.createElement('li');
+    li.append(a);
+    items.push(li);
+  }
+  if (feedMenu.matches(':popover-open')) feedMenu.hidePopover();
+  feedMenu.querySelector('ul').replaceChildren(...items);
+  feedsButton.hidden = !items.length;
+}
+
 // The first of the fields generators use for a last-modified date, in the
 // reader's locale. A bare YYYY-MM-DD is a calendar date, not UTC midnight,
 // which would show as the day before west of Greenwich.
@@ -112,6 +134,7 @@ function render(markdown, baseUrl) {
     content.prepend(h1);
   }
   renderDocNav(meta, baseUrl);
+  renderFeedMenu(frontMatterFeeds(meta), baseUrl);
   addHeadingIds();
   resolveUrls(content, baseUrl);
   return meta;
@@ -123,6 +146,7 @@ function render(markdown, baseUrl) {
 function renderFeed(feed, feedUrl) {
   content.replaceChildren();
   docNav.replaceChildren();
+  renderFeedMenu([]);
   const h1 = document.createElement('h1');
   h1.append(feed.title ? linkTo(decodeEntities(feed.title), feed.link, feedUrl) : feedUrl);
   content.append(h1);
@@ -211,6 +235,7 @@ function pointLink(a, href, baseUrl) {
 function showError(result) {
   content.replaceChildren();
   docNav.replaceChildren();
+  renderFeedMenu([]);
   const p = document.createElement('p');
   p.className = 'error';
   p.textContent = result.error;
@@ -308,6 +333,18 @@ function followLink(e) {
 
 content.addEventListener('click', followLink);
 docNav.addEventListener('click', followLink);
+feedMenu.addEventListener('click', (e) => {
+  followLink(e);
+  if (e.target.closest('a')) feedMenu.hidePopover();
+});
+
+// The menu sits in the top layer, so it is placed under the button when it opens.
+feedMenu.addEventListener('beforetoggle', (e) => {
+  if (e.newState !== 'open') return;
+  const { bottom, right } = feedsButton.getBoundingClientRect();
+  feedMenu.style.top = `${bottom + 4}px`;
+  feedMenu.style.right = `${document.documentElement.clientWidth - right}px`;
+});
 
 document.getElementById('back').addEventListener('click', () => history.back());
 document.getElementById('forward').addEventListener('click', () => history.forward());
