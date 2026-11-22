@@ -16,6 +16,7 @@
   "type": "module",
   "dependencies": {
     "dompurify": "^3.4.17",
+    "fast-xml-parser": "^5.12.1",
     "github-markdown-css": "^5.9.0",
     "marked": "^18.1.0"
   },

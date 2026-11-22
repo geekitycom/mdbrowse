@@ -18,6 +18,12 @@ GitHub-flavored Markdown. Links open inside mdbrowse, and Back, Forward and
   or a `/?url=` link from another site, shows an error for a non-Markdown page
   instead, so `/?url=` can't be used to send people to arbitrary sites. The
   error has a plain link to the page, to open it in the browser.
+- An RSS 2.0 feed, served as `application/rss+xml`, `text/xml` or
+  `application/xml`, is shown as a list of its items in feed order, each
+  with its title linked to its page, or its date when it has no title. An
+  item's body is shown only when the feed carries it as Markdown in
+  [`<source:markdown>`](https://source.scripting.com); HTML descriptions
+  are never shown. Other XML is not Markdown.
 - An HTML page that links to a Markdown version of itself with
   `<link rel="alternate" type="text/markdown" href="...">` in its head shows
   that version instead.
