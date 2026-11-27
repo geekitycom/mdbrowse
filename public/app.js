@@ -10,6 +10,9 @@ DOMPurify.addHook('afterSanitizeAttributes', (node) => {
     if (node.getAttribute('type') !== 'checkbox') return node.remove();
     node.setAttribute('disabled', '');
   }
+  // Hosts with hotlink protection refuse images requested with a foreign
+  // Referer, and the Referer would tell them which document is being read.
+  if (node.nodeName === 'IMG') node.setAttribute('referrerpolicy', 'no-referrer');
   for (const attr of ['id', 'name']) {
     const value = node.getAttribute(attr);
     if (value) node.setAttribute(attr, `user-content-${value}`);
