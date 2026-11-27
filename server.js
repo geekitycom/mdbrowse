@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { markdownAlternate } from './alternate.js';
 import { FEED_TYPES, parseRss } from './feed.js';
+import { githubRawUrl } from './github.js';
 import { homepageSource } from './homepage.js';
 import { isMarkdownType } from './markdown-type.js';
 import { FetchError, isPublicAddress, readBody, safeGet } from './safe-fetch.js';
@@ -107,7 +108,14 @@ async function fetchOne(target, { linkedAsMarkdown = false } = {}) {
 
 // An HTML page can point to its Markdown version with
 // <link rel="alternate" type="text/markdown">, which is shown in its place.
+// A Markdown file's page on GitHub is replaced by the raw file without
+// fetching the page; if the raw file can't be had, the page is fetched.
 async function fetchPage(target) {
+  const raw = githubRawUrl(target);
+  if (raw) {
+    const file = await fetchOne(raw, { linkedAsMarkdown: true });
+    if (file.ok && file.status < 300) return { ...file, alternateOf: target };
+  }
   const { alternate, ...result } = await fetchOne(target);
   if (!alternate) return result;
   const { alternate: _, ...markdown } = await fetchOne(alternate, { linkedAsMarkdown: true });
