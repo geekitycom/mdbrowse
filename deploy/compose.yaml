@@ -37,3 +37,6 @@ services:
     environment:
       # Fixed so the port mapping and the image's healthcheck agree.
       PORT: '3000'
+      # The start page, read from main so the list of sites changes without a
+      # new image. The copy in the image is served if GitHub cannot be reached.
+      MDBROWSE_HOMEPAGE_URL: 'https://raw.githubusercontent.com/geekitycom/mdbrowse/refs/heads/main/homepage.md'

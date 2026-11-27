@@ -73,6 +73,8 @@ pnpm start
 Then open <http://localhost:3000>. `pnpm start` restarts the server when
 `server.js` or a module it imports changes. Files under `public/` and
 `homepage.md` are read on every request, so a browser refresh picks them up.
+This holds for `homepage.md` unless `MDBROWSE_HOMEPAGE_URL` is set (see
+[Configuration](#configuration)).
 
 `pnpm install` also installs the Git hook
 that checks commit messages (see [Releasing](#releasing)).
@@ -92,6 +94,16 @@ pnpm test
 |---|---|---|
 | `PORT` | `3000` | The port the server listens on. |
 | `MDBROWSE_ALLOW_PRIVATE` | unset | Set to `true` to let mdbrowse fetch loopback, private and link-local addresses. |
+| `MDBROWSE_HOMEPAGE_URL` | unset | A URL to fetch the start page from instead of the bundled `homepage.md`. |
+
+When `MDBROWSE_HOMEPAGE_URL` is set, the server fetches the start page from it
+and keeps each copy for five minutes. If a fetch fails, it serves the last copy
+that loaded, or the bundled `homepage.md` if none has. To see the live start
+page while developing, start the server with:
+
+```sh
+MDBROWSE_HOMEPAGE_URL=https://raw.githubusercontent.com/geekitycom/mdbrowse/refs/heads/main/homepage.md pnpm start
+```
 
 By default mdbrowse refuses to fetch any address that is not on the public
 internet. It checks each redirect too. This stops a deployed instance from
@@ -203,5 +215,8 @@ if it stops answering.
 To upgrade, publish the new image, change `MDBROWSE_TAG` in the `.env`, and
 update the stack. To roll back, set the previous version and update again.
 
-To change the start page, edit `homepage.md`. It is part of the image, so the
-change goes live with the next published image.
+The stack sets `MDBROWSE_HOMEPAGE_URL` to `homepage.md` on the `main` branch,
+so a change to the start page goes live within about ten minutes of reaching
+`main`, with no new image: GitHub caches the file for five minutes, and
+mdbrowse keeps its copy for five more. The copy of `homepage.md` in the image is
+served only when GitHub cannot be reached.

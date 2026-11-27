@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { extname, join } from 'node:path';
 import { markdownAlternate } from './alternate.js';
 import { FEED_TYPES, parseRss } from './feed.js';
+import { homepageSource } from './homepage.js';
 import { isMarkdownType } from './markdown-type.js';
 import { FetchError, isPublicAddress, readBody, safeGet } from './safe-fetch.js';
 
@@ -12,11 +13,12 @@ const MAX_BYTES = 5 * 1024 * 1024;
 // For local development against servers on this machine or the LAN.
 const isAllowed = process.env.MDBROWSE_ALLOW_PRIVATE === 'true' ? () => true : isPublicAddress;
 
+const homepage = homepageSource({ url: process.env.MDBROWSE_HOMEPAGE_URL, file: join(ROOT, 'homepage.md') });
+
 const STATIC = {
   '/app.js': 'public/app.js',
   '/sanitize.js': 'public/sanitize.js',
   '/front-matter.js': 'public/front-matter.js',
-  '/homepage.md': 'homepage.md',
   '/vendor/marked.js': 'node_modules/marked/lib/marked.esm.js',
   '/vendor/purify.js': 'node_modules/dompurify/dist/purify.es.mjs',
   '/vendor/github-markdown.css': 'node_modules/github-markdown-css/github-markdown.css',
@@ -187,6 +189,14 @@ http
     }
 
     if (pathname === '/') return serveBrowser(req, res, searchParams.get('url'));
+
+    if (pathname === '/homepage.md') {
+      try {
+        return send(res, 200, MIME['.md'], await homepage());
+      } catch {
+        return send(res, 500, 'text/plain', 'Could not read file');
+      }
+    }
 
     const file = STATIC[pathname];
     if (!file) return send(res, 404, 'text/plain', 'Not found');
