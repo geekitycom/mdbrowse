@@ -213,6 +213,8 @@ function addHeadingIds() {
 
 function resolveUrls(root, baseUrl) {
   for (const img of root.querySelectorAll('img[src]')) {
+    // A broken image would only show the browser's placeholder, so it is hidden.
+    img.addEventListener('error', () => { img.hidden = true; }, { once: true });
     img.src = new URL(img.getAttribute('src'), baseUrl).href;
   }
   for (const a of root.querySelectorAll('a[href]')) pointLink(a, a.getAttribute('href'), baseUrl);
