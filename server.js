@@ -19,6 +19,7 @@ const STATIC = {
   '/app.js': 'public/app.js',
   '/sanitize.js': 'public/sanitize.js',
   '/front-matter.js': 'public/front-matter.js',
+  '/viewer-link.js': 'public/viewer-link.js',
   '/vendor/marked.js': 'node_modules/marked/lib/marked.esm.js',
   '/vendor/purify.js': 'node_modules/dompurify/dist/purify.es.mjs',
   '/vendor/github-markdown.css': 'node_modules/github-markdown-css/github-markdown.css',

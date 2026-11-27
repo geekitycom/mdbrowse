@@ -1,6 +1,7 @@
 import { marked } from '/vendor/marked.js';
 import DOMPurify from '/vendor/purify.js';
 import { SANITIZE } from '/sanitize.js';
+import { unwrapViewerLink } from '/viewer-link.js';
 import { fillPlaceholders, frontMatterFeeds, isReadableFeedType, splitFrontMatter } from '/front-matter.js';
 
 marked.setOptions({ gfm: true });
@@ -221,11 +222,12 @@ function resolveUrls(root, baseUrl) {
 }
 
 // http(s) links point at mdbrowse itself, so opening one in a new tab opens
-// it in mdbrowse; the document's own URL is kept in data-target.
+// it in mdbrowse; the document's own URL is kept in data-target. A link to a
+// document in another Markdown viewer opens that document here instead.
 function pointLink(a, href, baseUrl) {
   let target;
   try {
-    target = new URL(href, baseUrl);
+    target = unwrapViewerLink(new URL(href, baseUrl));
   } catch {
     return;
   }
