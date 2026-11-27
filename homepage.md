@@ -19,6 +19,7 @@ Each link goes to the site's homepage. mdbrowse shows its Markdown version when 
 - [inessential](https://brent.writersweb.org/)
 - [Joost.blog](https://joost.blog/)
 - [Joseph Fieber](https://josephfieber.com/)
+- [Joshua Morris](https://joshuamorris.info/)
 - [Kevin Drum](https://jabberwocking.com/)
 - [Latent Mirror](https://latentmirror.com/)
 - [Lever Time - The Lever](https://www.levernews.com/)
