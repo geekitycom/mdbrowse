@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.6.0...mdbrowse-v1.7.0) (2026-11-27)
+
+
+### Features
+
+* hide images that fail to load ([5e2ead8](https://github.com/geekitycom/mdbrowse/commit/5e2ead8167f7d11671ae820545053628f59e7ead))
+* load the start page from a configurable URL ([970569a](https://github.com/geekitycom/mdbrowse/commit/970569a169c5bff50380643e67d787d25026e7f3))
+
+
+### Bug Fixes
+
+* send images without a referrer so hotlink-protected hosts serve them ([efbcb6f](https://github.com/geekitycom/mdbrowse/commit/efbcb6f189a516df7d7793f1244bb8290bd23617))
+
 ## [1.6.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.5.0...mdbrowse-v1.6.0) (2026-11-22)
 
 
