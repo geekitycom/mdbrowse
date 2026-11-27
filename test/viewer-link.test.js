@@ -12,6 +12,13 @@ describe('unwrapViewerLink', () => {
     );
   });
 
+  test('opens the document a link into mdbrowse shows', () => {
+    assert.equal(
+      unwrap('https://md.geekity.com/?url=https%3A%2F%2Fjoshuamorris.info%2Fnotes%2F2026%2F11%2F26%2Flet-the-web-speak-markdown%2F'),
+      'https://joshuamorris.info/notes/2026/11/26/let-the-web-speak-markdown/',
+    );
+  });
+
   test('keeps the fragment of the document', () => {
     assert.equal(unwrap('https://demo.bonbonweb.org/?url=https%3A%2F%2Fexample.com%2Fa.md%23intro'), 'https://example.com/a.md#intro');
   });
@@ -22,6 +29,7 @@ describe('unwrapViewerLink', () => {
     'https://demo.bonbonweb.org/?url=not-a-url',
     'https://demo.bonbonweb.org/?url=javascript%3Aalert(1)',
     'https://demo.bonbonweb.org/about?url=https%3A%2F%2Fexample.com%2Fa.md',
+    'https://md.geekity.com/homepage.md',
     'https://example.com/?url=https%3A%2F%2Fexample.com%2Fa.md',
   ];
   for (const url of unchanged) {
