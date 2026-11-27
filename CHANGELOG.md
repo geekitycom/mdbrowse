@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.8.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.7.0...mdbrowse-v1.8.0) (2026-11-27)
+
+
+### Features
+
+* open documents linked through md.geekity.com directly ([7ccd2a4](https://github.com/geekitycom/mdbrowse/commit/7ccd2a43bb9c2dc81b9c7ca3a41cec035b707c66))
+* open documents linked through other markdown viewers directly ([b830079](https://github.com/geekitycom/mdbrowse/commit/b830079b87ce1349379b0bf1dc397cd58f4287a4))
+
 ## [1.7.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.6.0...mdbrowse-v1.7.0) (2026-11-27)
 
 
