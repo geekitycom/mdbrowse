@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.8.0...mdbrowse-v1.9.0) (2026-11-27)
+
+
+### Features
+
+* show markdown files on github as their raw files ([5456869](https://github.com/geekitycom/mdbrowse/commit/545686975dcc09d13895da1c91f8fa5f02e2f630))
+
 ## [1.8.0](https://github.com/geekitycom/mdbrowse/compare/mdbrowse-v1.7.0...mdbrowse-v1.8.0) (2026-11-27)
 
 
